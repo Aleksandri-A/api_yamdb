@@ -8,8 +8,17 @@ from reviews.models import Title, Genre, Category
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор title"""
-    genre = SlugRelatedField(slug_field='slug', read_only=True)
-    category = SlugRelatedField(slug_field='slug', read_only=True)
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        required=True
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all(),
+        required=True    
+    )
+    description = serializers.CharField(required=False)
     class Meta:
         fields = '__all__'
         model = Title
