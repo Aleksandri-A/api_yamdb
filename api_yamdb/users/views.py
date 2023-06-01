@@ -8,16 +8,20 @@ from django.db import IntegrityError
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions
+# from rest_framework import permissions
+from rest_framework import filters
 
 from users.serializers import UserSerializer, SignupSerializer, TokenSerializer
-from users.models import User, Confirm
+from users.models import User
+from users.permissions import AuthorOrAdmin
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (AuthorOrAdmin,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
 
 
 @api_view(['POST'])
