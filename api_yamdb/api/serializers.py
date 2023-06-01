@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
 import datetime as dt
+import re
 
 from reviews.models import Title, Genre, Category
 
@@ -12,12 +13,26 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
         model = Genre
 
+    def validate_slug(self, value):
+        """Валидация имени слага."""
+        regex = r'^[-a-zA-Z0-9_]+$'
+        if not re.match(regex, value):
+            raise serializers.ValidationError('Неверное имя slug')
+        return value
+
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор category."""
     class Meta:
         fields = ('name', 'slug')
         model = Category
+    
+    def validate_slug(self, value):
+        """Валидация имени слага."""
+        regex = r'^[-a-zA-Z0-9_]+$'
+        if not re.match(regex, value):
+            raise serializers.ValidationError('Неверное имя slug')
+        return value
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -41,6 +56,7 @@ class TitleUnsaveSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects.all()
     )
+    description = serializers.CharField(required=False)
 
     class Meta:
         model = Title
