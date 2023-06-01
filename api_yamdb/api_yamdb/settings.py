@@ -15,15 +15,19 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'reviews.apps.ReviewsConfig',
+    'users.apps.UsersConfig',
+    'api.apps.ApiConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'reviews.apps.ReviewsConfig',
-    'api.apps.ApiConfig',
-    'users.apps.UsersConfig',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters',
+
 ]
 
 MIDDLEWARE = [
@@ -104,3 +108,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
+}
