@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from django.core.exceptions import ValidationError
 
-from users.models import User
+from users.models import User, Confirm
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -41,7 +41,7 @@ def validate_username(self, value):
         )
 
 
-class TokenSerializer(serializers.Serializer):
+class TokenSerializer(serializers.ModelSerializer):
     username = serializers.RegexField(
         required=True,
         regex=r'^[\w.@+-]+\Z',
@@ -51,3 +51,7 @@ class TokenSerializer(serializers.Serializer):
         max_length=400,
         required=True,
     )
+
+    class Meta:
+        model = Confirm
+        fields = ('username', 'confirmation_code')

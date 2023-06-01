@@ -7,14 +7,17 @@ from rest_framework.decorators import api_view, permission_classes
 from django.db import IntegrityError
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
+from rest_framework import permissions
 
 from users.serializers import UserSerializer, SignupSerializer, TokenSerializer
-from users.models import User
+from users.models import User, Confirm
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (permissions.IsAdminUser,)
 
 
 @api_view(['POST'])
@@ -45,6 +48,11 @@ def signup(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+# class ConfirmViewSet(viewsets.ModelViewSet):
+#     queryset = Confirm.objects.all()
+#     serializer_class = TokenSerializer
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny, ])
 def get_tokens_for_user(request):
@@ -52,7 +60,13 @@ def get_tokens_for_user(request):
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data.get('username')
     confirmation_code = serializer.validated_data.get('confirmation_code')
-    refresh = RefreshToken.for_user(username, confirmation_code)
-    return {
-        'token': str(refresh.access_token),
-    }
+    try:
+        user = get_object_or_404(User, username=username)
+    except IntegrityError:
+        return Response(
+            '...',
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    refresh = RefreshToken.for_user(user)
+    data = {'token': str(refresh.access_token)}
+    return Response(data, status=status.HTTP_200_OK)
