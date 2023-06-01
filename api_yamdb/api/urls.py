@@ -12,6 +12,6 @@ router.register('posts', GenreViewSet, basename='genre')
 router.register('categories', CategoryViewSet, basename='category')
 
 urlpatterns = [
-    # path('v1/api-token-auth/', views.obtain_auth_token),
+    path('v1/api-token-auth/', views.obtain_auth_token),
     path('v1/', include(router.urls)),
 ]

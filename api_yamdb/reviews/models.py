@@ -76,3 +76,6 @@ class TitleGenre(models.Model):
 
     class Meta:
         unique_together = ('title', 'genre')
+
+    def __str__(self):
+        return f'{self.title} - {self.genre}'
