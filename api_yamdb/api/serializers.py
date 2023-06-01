@@ -20,7 +20,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             title_id=self.context['view'].kwargs.get('title_id')
         ).exists() and self.context['request'].method == 'POST':
             raise serializers.ValidationError(
-                'Нельзя оставить два отзыва на одно произведение.')
+                'Одно произведение - один отзыв!.')
         return data
 
 
