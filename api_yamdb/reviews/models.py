@@ -34,10 +34,10 @@ class Title(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Название',
-        )
+    )
     year = models.IntegerField(
         verbose_name='Год выпуска',
-        )
+    )
     description = models.TextField(
         verbose_name='Описание',
     )
@@ -67,7 +67,7 @@ class TitleGenre(models.Model):
     """Модель для связи многие-ко-многим для произведений и жанров."""
     title = models.ForeignKey(
         Title,
-         on_delete=models.CASCADE
+        on_delete=models.CASCADE
     )
     genre = models.ForeignKey(
         Genre,

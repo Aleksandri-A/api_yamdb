@@ -1,10 +1,9 @@
-from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
-
 import datetime as dt
 import re
 
-from reviews.models import Title, Genre, Category
+from rest_framework import serializers
+
+from reviews.models import Category, Genre, Title
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -26,7 +25,7 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Category
-    
+
     def validate_slug(self, value):
         """Валидация имени слага."""
         regex = r'^[-a-zA-Z0-9_]+$'
@@ -40,6 +39,7 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
     description = serializers.CharField(required=False)
+
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category',)
         model = Title
