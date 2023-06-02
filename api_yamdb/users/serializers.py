@@ -49,7 +49,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-class SignupSerializer(serializers.Serializer):
+class SignupSerializer(serializers.ModelSerializer):
     username = serializers.RegexField(
         required=True,
         regex=r'^[\w.@+-]+\Z',
@@ -61,12 +61,19 @@ class SignupSerializer(serializers.Serializer):
         max_length=254
     )
 
+    def validate_username(self, value):
+        username = value.lower()
+        if username == 'me':
+            raise ValidationError(
+                'Username "me" не может быть создан, придумайте другое имя.'
+            )
+        return value
 
-def validate_username(self, value):
-    username = value.lower()
-    if username == 'me':
-        raise ValidationError(
-            'Username "me" не может быть создан, придумайте другое имя.'
+    class Meta:
+        model = User
+        fields = (
+            "username",
+            "email",
         )
 
 

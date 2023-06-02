@@ -72,11 +72,6 @@ def signup(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# class ConfirmViewSet(viewsets.ModelViewSet):
-#     queryset = Confirm.objects.all()
-#     serializer_class = TokenSerializer
-
-
 @api_view(['POST'])
 @permission_classes([AllowAny, ])
 def get_tokens_for_user(request):
