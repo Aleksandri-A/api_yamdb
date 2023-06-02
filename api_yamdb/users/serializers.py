@@ -6,6 +6,27 @@ from users.models import User, Confirm
 
 
 class UserSerializer(serializers.ModelSerializer):
+    username = serializers.RegexField(
+        required=True,
+        regex=r'^[\w.@+-]+\Z',
+        max_length=150)
+    email = serializers.EmailField(
+        required=True,
+        allow_blank=False,
+        trim_whitespace=True,
+        max_length=254
+    )
+    bio = serializers.CharField(required=False, allow_blank=True)
+    first_name = serializers.CharField(
+        max_length=150,
+        required=False,
+        allow_blank=True
+    )
+    last_name = serializers.CharField(
+        max_length=150,
+        required=False,
+        allow_blank=True
+    )
 
     def create(self, validated_data):
 
@@ -17,7 +38,14 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("username", "email")
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "bio",
+            "role"
+        )
 
 
 class SignupSerializer(serializers.Serializer):

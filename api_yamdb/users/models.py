@@ -1,17 +1,26 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+
+
+ROLE = (
+    ('user', 'user'),
+    ('is_moderator', 'moderator'),
+    ('is_staff', 'admin')
+)
 
 
 class User(AbstractUser):
-    email = models.EmailField(
-        _('email address'),
-        unique=True,
-        max_length=254,
-    )
+    email = models.EmailField(unique=True, max_length=254,)
+    bio = models.TextField(blank=True)
+    role = models.CharField(max_length=255, choices=ROLE, default='user')
 
+    is_staff = models.BooleanField(default=False)
+    is_moderator = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+
+    def str(self):
+        return self.username
 
 
 class Confirm(models.Model):

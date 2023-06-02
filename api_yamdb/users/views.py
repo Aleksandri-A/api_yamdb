@@ -8,20 +8,40 @@ from django.db import IntegrityError
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-# from rest_framework import permissions
+from rest_framework import permissions
 from rest_framework import filters
+from rest_framework.decorators import action
 
 from users.serializers import UserSerializer, SignupSerializer, TokenSerializer
 from users.models import User
-from users.permissions import AuthorOrAdmin
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (AuthorOrAdmin,)
+    permission_classes = (permissions.IsAdminUser,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        url_path='me',
+        permission_classes=[permissions.IsAuthenticated, ])
+    def me(self, request):
+        user = get_object_or_404(User, username=self.request.user.username)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(
+                request.user,
+                data=request.data,
+                partial=True
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=400)
+        serializer = self.get_serializer(user, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -32,7 +52,7 @@ def signup(request):
     email = serializer.validated_data.get('email')
     username = serializer.validated_data.get('username')
     try:
-        user = User.objects.create(
+        user, created = User.objects.get_or_create(
             username=username, email=email
         )
     except IntegrityError:
