@@ -4,8 +4,8 @@ from django.db import models
 
 ROLE = (
     ('user', 'user'),
-    ('is_moderator', 'moderator'),
-    ('is_staff', 'admin')
+    ('moderator', 'moderator'),
+    ('admin', 'admin')
 )
 
 
@@ -14,8 +14,6 @@ class User(AbstractUser):
     bio = models.TextField(blank=True)
     role = models.CharField(max_length=255, choices=ROLE, default='user')
 
-    is_staff = models.BooleanField(default=False)
-    is_moderator = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
