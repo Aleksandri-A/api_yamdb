@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from django.core.exceptions import ValidationError
 
-from users.models import User, Confirm
+from users.models import User, Confirm, ROLE
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -27,6 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
         required=False,
         allow_blank=True
     )
+    role = serializers.ChoiceField(choices=ROLE, read_only=True)
 
     def create(self, validated_data):
 
