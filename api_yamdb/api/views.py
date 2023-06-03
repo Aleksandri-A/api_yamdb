@@ -1,20 +1,67 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, viewsets
-from rest_framework.pagination import LimitOffsetPagination
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticatedOrReadOnly
 
+from reviews.models import Category, Genre, Title, Review, Title
+
+from .serializers import (CategorySerializer, GenreSerializer, TitleSerializer,
+                          TitleUnsaveSerializer,CommentSerializer, ReviewSerializer)
 from .permissions import (IsAuthorAdminModeratorOrReadOnlyPermission, )
 
-from reviews.models import Review, Title
 
-from .serializers import (CommentSerializer, ReviewSerializer)
+class TitleViewSet(viewsets.ModelViewSet):
+    """Вью функция для произведений"""
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAdminUser()]
+
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('genre', 'category', 'name', 'year')
+    pagination_class = PageNumberPagination
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleSerializer
+        return TitleUnsaveSerializer
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
+class GenreViewSet(viewsets.ModelViewSet):
+    """Вью функция для жанров"""
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAdminUser()]
+
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    pagination_class = PageNumberPagination
+    lookup_field = 'slug'
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    """Вью функция для категорий"""
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAdminUser()]
+
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    pagination_class = PageNumberPagination
+    lookup_field = 'slug'
+
+    
+    class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет отзывов."""
     serializer_class = ReviewSerializer
     permission_classes = [
         IsAuthorAdminModeratorOrReadOnlyPermission,
-        permissions.IsAuthenticatedOrReadOnly
+        IsAuthenticatedOrReadOnly
     ]
     pagination_class = LimitOffsetPagination
 
@@ -36,7 +83,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [
         IsAuthorAdminModeratorOrReadOnlyPermission,
-        permissions.IsAuthenticatedOrReadOnly
+        IsAuthenticatedOrReadOnly
     ]
     pagination_class = LimitOffsetPagination
 
