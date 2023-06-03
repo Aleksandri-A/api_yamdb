@@ -23,7 +23,6 @@ router.register('genres', GenreViewSet, basename='genre')
 router.register('categories', CategoryViewSet, basename='category')
 
 urlpatterns = [
-    path('v1/api-token-auth/', views.obtain_auth_token),
     path(
         'v1/categories/<slug:slug>/',
         CategoryViewSet.as_view({'delete': 'destroy'}),
