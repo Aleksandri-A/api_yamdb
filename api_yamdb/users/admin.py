@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import User
-from reviews.models import Reviews, Genres, Categories, Titles
+from reviews.models import Reviews, Genres, Categories, Titles, Comments
 
 
 admin.site.register(User)
@@ -8,3 +8,4 @@ admin.site.register(Reviews)
 admin.site.register(Genres)
 admin.site.register(Categories)
 admin.site.register(Titles)
+admin.site.register(Comments)

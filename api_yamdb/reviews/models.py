@@ -15,3 +15,7 @@ class Categories(models.Model):
 
 class Titles(models.Model):
     pass
+
+
+class Comments(models.Model):
+    pass
