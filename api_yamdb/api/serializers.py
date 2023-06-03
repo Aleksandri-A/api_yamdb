@@ -4,7 +4,7 @@ import statistics as st
 
 from rest_framework import serializers
 
-from reviews.models import Category, Genre, Title, Comments, Review
+from reviews.models import Category, Genre, Title, Comment, Review
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -45,7 +45,7 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category',)
         model = Title
-    
+
     def get_rating(self, obj):
         if obj.reviews.count() == 0:
             return None
@@ -78,8 +78,8 @@ class TitleUnsaveSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Проверьте год выпуска!')
         return value
 
-      
- class ReviewSerializer(serializers.ModelSerializer):
+
+class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор отзывов."""
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
@@ -108,5 +108,5 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = Comments
+        model = Comment
         read_only_fields = ('review', 'author')

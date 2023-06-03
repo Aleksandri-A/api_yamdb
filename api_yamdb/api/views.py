@@ -1,13 +1,16 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticatedOrReadOnly
+from rest_framework.pagination import (PageNumberPagination,
+                                       LimitOffsetPagination)
+from rest_framework.permissions import (AllowAny, IsAdminUser,
+                                        IsAuthenticatedOrReadOnly)
 
 from reviews.models import Category, Genre, Title, Review, Title
 
 from .serializers import (CategorySerializer, GenreSerializer, TitleSerializer,
-                          TitleUnsaveSerializer,CommentSerializer, ReviewSerializer)
+                          TitleUnsaveSerializer, CommentSerializer,
+                          ReviewSerializer)
 from .permissions import (IsAuthorAdminModeratorOrReadOnlyPermission, )
 
 
@@ -55,8 +58,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     lookup_field = 'slug'
 
-    
-    class ReviewViewSet(viewsets.ModelViewSet):
+
+class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет отзывов."""
     serializer_class = ReviewSerializer
     permission_classes = [
