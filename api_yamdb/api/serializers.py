@@ -1,9 +1,14 @@
 import datetime as dt
 import re
+import statistics as st
 
 from rest_framework import serializers
 
 from reviews.models import Category, Genre, Title
+
+
+class Review(serializers.ModelSerializer):
+    pass
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -39,10 +44,19 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
     description = serializers.CharField(required=False)
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category',)
         model = Title
+    
+    def get_rating(self, obj):
+        if obj.reviews.count() == 0:
+            return None
+        rev = Review.objects.filter(title=obj).aggregate(
+            rating=st.mean('score')
+        )
+        return rev['rating']
 
 
 class TitleUnsaveSerializer(serializers.ModelSerializer):
