@@ -79,3 +79,12 @@ class TitleGenre(models.Model):
 
     def __str__(self):
         return f'{self.title} - {self.genre}'
+
+
+class Reviews(models.Model):
+    pass
+
+  
+class Comments(models.Model):
+    pass
+
