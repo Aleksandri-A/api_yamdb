@@ -6,36 +6,48 @@ from users.models import User, Confirm, ROLE
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.RegexField(
-        required=True,
-        regex=r'^[\w.@+-]+\Z',
-        max_length=150)
-    email = serializers.EmailField(
-        required=True,
-        allow_blank=False,
-        trim_whitespace=True,
-        max_length=254
-    )
-    bio = serializers.CharField(required=False, allow_blank=True)
-    first_name = serializers.CharField(
-        max_length=150,
-        required=False,
-        allow_blank=True
-    )
-    last_name = serializers.CharField(
-        max_length=150,
-        required=False,
-        allow_blank=True
-    )
-    role = serializers.ChoiceField(choices=ROLE, read_only=True)
+    # username = serializers.RegexField(
+    #     required=True,
+    #     regex=r'^[\w.@+-]+\Z',
+    #     max_length=150)
+    # email = serializers.EmailField(
+    #     required=True,
+    #     allow_blank=False,
+    #     trim_whitespace=True,
+    #     max_length=254
+    # )
+    # bio = serializers.CharField(required=False, allow_blank=True)
+    # first_name = serializers.CharField(
+    #     max_length=150,
+    #     required=False,
+    #     allow_blank=True
+    # )
+    # last_name = serializers.CharField(
+    #     max_length=150,
+    #     required=False,
+    #     allow_blank=True
+    # )
+    # role = serializers.ChoiceField(choices=ROLE)
 
-    def create(self, validated_data):
+    def validate_role(self, value):
+        if (
+            self.context['request'].user.role == 'admin'
+            or self.context['request'].user.is_superuser
+        ):
+            return value
+        return 'user'
 
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-        )
-        return user
+    # def create(self, validated_data):
+
+    #     user = User.objects.create_user(
+    #         username=validated_data['username'],
+    #         email=validated_data['email'],
+    #         bio=validated_data['bio'],
+    #         first_name=validated_data['first_name'],
+    #         last_name=validated_data['last_name'],
+    #         role=validated_data['role']
+    #     )
+    #     return user
 
     class Meta:
         model = User

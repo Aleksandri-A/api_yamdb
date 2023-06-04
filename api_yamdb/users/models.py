@@ -5,7 +5,7 @@ from django.db import models
 ROLE = (
     ('user', 'user'),
     ('moderator', 'moderator'),
-    ('admin', 'admin')
+    ('admin', 'admin'),
 )
 
 
@@ -16,6 +16,13 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+
+    # @property
+    # def is_admin(self):
+    #     if self.user.is_superuser:
+    #         return self.user.role == 'admin'
+    #     elif self.user.is_staff:
+    #         return self.user.role == 'admin'
 
     def str(self):
         return self.username
