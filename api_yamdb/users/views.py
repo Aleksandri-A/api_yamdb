@@ -39,6 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = UserSerializer(
                 request.user,
                 data=request.data,
+                context={'request': request},
                 partial=True
             )
             if serializer.is_valid():
@@ -89,18 +90,14 @@ def get_tokens_for_user(request):
     username = serializer.validated_data.get('username')
     confirmation_code = serializer.validated_data.get('confirmation_code')
     user = get_object_or_404(User, username=username)
-    if confirmation_code != Confirm.objects.get(username=user).confirmation_code:
+    if confirmation_code != (
+        Confirm.objects.get(username=user).confirmation_code
+    ):
         return Response(
-            '...',
+            'Введенный код не верный',
             status=status.HTTP_400_BAD_REQUEST
         )
-    # try:
-    #     user = get_object_or_404(User, username=username)
-    # except IntegrityError:
-    #     return Response(
-    #         '...',
-    #         status=status.HTTP_400_BAD_REQUEST
-    #     )
+
     refresh = RefreshToken.for_user(user)
     data = {'token': str(refresh.access_token)}
     return Response(data, status=status.HTTP_200_OK)

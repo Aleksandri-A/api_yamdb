@@ -2,32 +2,10 @@ from rest_framework import serializers
 
 from django.core.exceptions import ValidationError
 
-from users.models import User, Confirm, ROLE
+from users.models import User, Confirm
 
 
 class UserSerializer(serializers.ModelSerializer):
-    # username = serializers.RegexField(
-    #     required=True,
-    #     regex=r'^[\w.@+-]+\Z',
-    #     max_length=150)
-    # email = serializers.EmailField(
-    #     required=True,
-    #     allow_blank=False,
-    #     trim_whitespace=True,
-    #     max_length=254
-    # )
-    # bio = serializers.CharField(required=False, allow_blank=True)
-    # first_name = serializers.CharField(
-    #     max_length=150,
-    #     required=False,
-    #     allow_blank=True
-    # )
-    # last_name = serializers.CharField(
-    #     max_length=150,
-    #     required=False,
-    #     allow_blank=True
-    # )
-    # role = serializers.ChoiceField(choices=ROLE)
 
     def validate_role(self, value):
         if (
@@ -36,18 +14,6 @@ class UserSerializer(serializers.ModelSerializer):
         ):
             return value
         return 'user'
-
-    # def create(self, validated_data):
-
-    #     user = User.objects.create_user(
-    #         username=validated_data['username'],
-    #         email=validated_data['email'],
-    #         bio=validated_data['bio'],
-    #         first_name=validated_data['first_name'],
-    #         last_name=validated_data['last_name'],
-    #         role=validated_data['role']
-    #     )
-    #     return user
 
     class Meta:
         model = User
