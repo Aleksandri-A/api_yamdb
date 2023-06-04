@@ -12,16 +12,21 @@ from rest_framework import permissions
 from rest_framework import filters
 from rest_framework.decorators import action
 
-from users.serializers import UserSerializer, SignupSerializer, TokenSerializer
-from users.models import User
+from users.serializers import (UserSerializer, SignupSerializer,
+                               TokenSerializer)
+from users.models import User, Confirm
+from users.permissions import IsAdminOnly
+# from rest_framework import permissions
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (IsAdminOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    lookup_field = 'username'
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(
         methods=['get', 'patch'],
@@ -34,6 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = UserSerializer(
                 request.user,
                 data=request.data,
+                context={'request': request},
                 partial=True
             )
             if serializer.is_valid():
@@ -61,7 +67,11 @@ def signup(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     confirmation_code = default_token_generator.make_token(user)
-    print(confirmation_code)
+    Confirm.objects.create(
+        username=user, confirmation_code=confirmation_code
+    )
+    print(">>>>>>>>>>>>>>>", confirmation_code)
+
     send_mail(
         subject='...',
         message=confirmation_code,
@@ -79,13 +89,15 @@ def get_tokens_for_user(request):
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data.get('username')
     confirmation_code = serializer.validated_data.get('confirmation_code')
-    try:
-        user = get_object_or_404(User, username=username)
-    except IntegrityError:
+    user = get_object_or_404(User, username=username)
+    if confirmation_code != (
+        Confirm.objects.get(username=user).confirmation_code
+    ):
         return Response(
-            '...',
+            'Введенный код не верный',
             status=status.HTTP_400_BAD_REQUEST
         )
+
     refresh = RefreshToken.for_user(user)
     data = {'token': str(refresh.access_token)}
     return Response(data, status=status.HTTP_200_OK)
