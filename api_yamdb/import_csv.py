@@ -1,23 +1,32 @@
 import csv
-import sqlite3
+import os
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api_yamdb.settings')
+django.setup()
 
-from reviews.models import Category
-
-# import os
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api_yamdb.settings')
+from users.models import User
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
-conn = sqlite3.connect('db.sqlite3')
-cursor = conn.cursor()
-file_name = input('Введите имя cvs-таблицы, которую хотите импортировать: ')
-# print(conn)
-# print(cursor)
+DICT = {
+    Category: 'category.csv',
+    Genre: 'genre.csv',
+    Title: 'titles.csv',
+    User: 'users.csv',
+    Review: 'review.csv',
+    Comment: 'comments.csv',
+}
 
-with open('static/data/' + file_name + '.csv', 'r') as csvfile:
-    csvreader = csv.reader(csvfile)
-    next(csvreader)
-    for row in csvreader:
-        obj, created = Category.objects.update_or_create(
-            id=row[0],
-            defaults={'name': row[1], 'slug': row[2]}
-        )
+for model, base in DICT.items():
+    with open(
+        f'static/data/{base}',
+        'r', encoding='utf-8'
+    ) as csv_file:
+        reader = csv.DictReader(csv_file)
+
+        objs_to_create = []
+        for data in reader:
+            if not model.objects.filter(id=data['id']).exists():
+                obj = model(**data)
+                objs_to_create.append(obj)
+        model.objects.bulk_create(objs_to_create)
