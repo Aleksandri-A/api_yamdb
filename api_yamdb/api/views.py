@@ -3,15 +3,16 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.pagination import (PageNumberPagination,
                                        LimitOffsetPagination)
-from rest_framework.permissions import (AllowAny, IsAdminUser,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (AllowAny, IsAuthenticatedOrReadOnly)
+from rest_framework import filters
 
 from reviews.models import Category, Genre, Title, Review, Title
 
 from .serializers import (CategorySerializer, GenreSerializer, TitleSerializer,
                           TitleUnsaveSerializer, CommentSerializer,
                           ReviewSerializer)
-from .permissions import (IsAuthorAdminModeratorOrReadOnlyPermission, )
+from .permissions import (IsAuthorAdminModeratorOrReadOnlyPermission,
+                          IsAdminOnly)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -19,13 +20,14 @@ class TitleViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
-        return [IsAdminUser()]
+        return [IsAdminOnly()]
 
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('genre', 'category', 'name', 'year')
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     pagination_class = PageNumberPagination
+    filterset_fields = ('genre__slug', 'category__slug', 'name', 'year')
+    
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -38,10 +40,12 @@ class GenreViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
-        return [IsAdminUser()]
+        return [IsAdminOnly()]
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
     pagination_class = PageNumberPagination
     lookup_field = 'slug'
 
@@ -51,10 +55,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
-        return [IsAdminUser()]
+        return [IsAdminOnly()]
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
     pagination_class = PageNumberPagination
     lookup_field = 'slug'
 
