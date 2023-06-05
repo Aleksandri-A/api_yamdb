@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as rf
 from rest_framework import viewsets
 from rest_framework.pagination import (PageNumberPagination,
                                        LimitOffsetPagination)
@@ -15,6 +16,17 @@ from .permissions import (IsAuthorAdminModeratorOrReadOnlyPermission,
                           IsAdminOnly)
 
 
+class TitleFilter(rf.FilterSet):
+    genre = rf.CharFilter(field_name='genre__slug', lookup_expr='exact')
+    category = rf.CharFilter(field_name='category__slug', lookup_expr='exact')
+    year = rf.NumberFilter(field_name='year', lookup_expr='exact')
+    name = rf.CharFilter(field_name='name', lookup_expr='exact')
+
+    class Meta:
+        model = Title
+        fields = ['genre', 'category', 'year', 'name']
+
+
 class TitleViewSet(viewsets.ModelViewSet):
     """Вью функция для произведений"""
     def get_permissions(self):
@@ -24,9 +36,10 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (rf.DjangoFilterBackend,)
     pagination_class = PageNumberPagination
-    filterset_fields = ('genre__slug', 'category__slug', 'name', 'year')
+    filterset_class = TitleFilter
+    # filterset_fields = ('name') # , 'year') # , 'category__slug') # ,'genre__slug')
     
 
     def get_serializer_class(self):
