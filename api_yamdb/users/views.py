@@ -1,21 +1,17 @@
-from rest_framework.permissions import AllowAny
-from rest_framework import viewsets
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import api_view, permission_classes
-from django.db import IntegrityError
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions
-from rest_framework import filters
-from rest_framework.decorators import action
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.serializers import (UserSerializer, SignupSerializer,
-                               TokenSerializer)
-from users.models import User, Confirm
+from users.models import Confirm, User
 from users.permissions import IsAdminOnly
+from users.serializers import SignupSerializer, TokenSerializer, UserSerializer
+
 # from rest_framework import permissions
 
 

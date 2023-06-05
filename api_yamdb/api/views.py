@@ -1,19 +1,18 @@
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as rf
-from rest_framework import viewsets
-from rest_framework.pagination import (PageNumberPagination,
-                                       LimitOffsetPagination)
-from rest_framework.permissions import (AllowAny, IsAuthenticatedOrReadOnly)
-from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, viewsets
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 
-from reviews.models import Category, Genre, Title, Review, Title
+from reviews.models import Category, Genre, Review, Title
 
-from .serializers import (CategorySerializer, GenreSerializer, TitleSerializer,
-                          TitleUnsaveSerializer, CommentSerializer,
-                          ReviewSerializer)
-from .permissions import (IsAuthorAdminModeratorOrReadOnlyPermission,
-                          IsAdminOnly)
+from .permissions import (IsAdminOnly,
+                          IsAuthorAdminModeratorOrReadOnlyPermission)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, TitleSerializer,
+                          TitleUnsaveSerializer)
 
 
 class TitleFilter(rf.FilterSet):
@@ -39,8 +38,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (rf.DjangoFilterBackend,)
     pagination_class = PageNumberPagination
     filterset_class = TitleFilter
-    # filterset_fields = ('name') # , 'year') # , 'category__slug') # ,'genre__slug')
-    
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
