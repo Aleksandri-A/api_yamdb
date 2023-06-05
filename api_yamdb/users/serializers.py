@@ -1,8 +1,7 @@
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
-from django.core.exceptions import ValidationError
-
-from users.models import User, Confirm
+from users.models import Confirm, User
 
 
 class UserSerializer(serializers.ModelSerializer):

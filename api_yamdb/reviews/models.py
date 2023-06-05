@@ -1,5 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from users.models import User
 
 LETTERS_LIMIT = 15
@@ -48,10 +49,7 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         through='TitleGenre',
-        # blank=True,
-        # null=True,
-        # on_delete=models.SET_NULL,
-        # related_name='titles',
+        related_name='titles',
         verbose_name='Жанры',
     )
     category = models.ForeignKey(
@@ -71,15 +69,20 @@ class TitleGenre(models.Model):
     """Модель для связи многие-ко-многим для произведений и жанров."""
     title = models.ForeignKey(
         Title,
-        on_delete=models.CASCADE
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='title'
     )
     genre = models.ForeignKey(
         Genre,
-        on_delete=models.CASCADE
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='genre'
     )
 
     class Meta:
         unique_together = ('title', 'genre')
+        ordering = ('title',)
 
     def __str__(self):
         return f'{self.title} - {self.genre}'

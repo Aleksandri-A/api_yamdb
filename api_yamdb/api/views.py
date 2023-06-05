@@ -1,17 +1,29 @@
 from django.shortcuts import get_object_or_404
+from django_filters import rest_framework as rf
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
-from rest_framework.pagination import (PageNumberPagination,
-                                       LimitOffsetPagination)
-from rest_framework.permissions import (AllowAny, IsAdminUser,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework import filters, viewsets
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 
-from reviews.models import Category, Genre, Title, Review, Title
+from reviews.models import Category, Genre, Review, Title
 
-from .serializers import (CategorySerializer, GenreSerializer, TitleSerializer,
-                          TitleUnsaveSerializer, CommentSerializer,
-                          ReviewSerializer)
-from .permissions import (IsAuthorAdminModeratorOrReadOnlyPermission, )
+from .permissions import (IsAdminOnly,
+                          IsAuthorAdminModeratorOrReadOnlyPermission)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, TitleSerializer,
+                          TitleUnsaveSerializer)
+
+
+class TitleFilter(rf.FilterSet):
+    genre = rf.CharFilter(field_name='genre__slug', lookup_expr='exact')
+    category = rf.CharFilter(field_name='category__slug', lookup_expr='exact')
+    year = rf.NumberFilter(field_name='year', lookup_expr='exact')
+    name = rf.CharFilter(field_name='name', lookup_expr='exact')
+
+    class Meta:
+        model = Title
+        fields = ['genre', 'category', 'year', 'name']
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -19,13 +31,13 @@ class TitleViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
-        return [IsAdminUser()]
+        return [IsAdminOnly()]
 
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('genre', 'category', 'name', 'year')
+    filter_backends = (rf.DjangoFilterBackend,)
     pagination_class = PageNumberPagination
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -38,10 +50,12 @@ class GenreViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
-        return [IsAdminUser()]
+        return [IsAdminOnly()]
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
     pagination_class = PageNumberPagination
     lookup_field = 'slug'
 
@@ -51,10 +65,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
-        return [IsAdminUser()]
+        return [IsAdminOnly()]
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
     pagination_class = PageNumberPagination
     lookup_field = 'slug'
 

@@ -1,10 +1,10 @@
 import datetime as dt
 import re
-import statistics as st
 
+from django.db.models import Avg
 from rest_framework import serializers
 
-from reviews.models import Category, Genre, Title, Comment, Review
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -43,14 +43,15 @@ class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category',)
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category',
+                  'rating')
         model = Title
 
     def get_rating(self, obj):
         if obj.reviews.count() == 0:
             return None
         rev = Review.objects.filter(title=obj).aggregate(
-            rating=st.mean('score')
+            rating=Avg('score')
         )
         return rev['rating']
 
@@ -70,7 +71,7 @@ class TitleUnsaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
 
     def validate_year(self, value):
         current_year = dt.date.today().year

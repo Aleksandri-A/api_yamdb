@@ -1,7 +1,6 @@
-from pathlib import Path
-from datetime import timedelta
-
 import os
+from datetime import timedelta
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -130,3 +129,5 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=100),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
