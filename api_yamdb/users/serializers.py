@@ -5,8 +5,9 @@ from users.models import Confirm, User
 
 
 class UserSerializer(serializers.ModelSerializer):
-
+    """Сериализатор для модели юзера."""
     def validate_role(self, value):
+        """Функция валидации роли."""
         if (
             self.context['request'].user.role == 'admin'
             or self.context['request'].user.is_superuser
@@ -27,6 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SignupSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели регистрации."""
     username = serializers.RegexField(
         required=True,
         regex=r'^[\w.@+-]+\Z',
@@ -39,6 +41,7 @@ class SignupSerializer(serializers.ModelSerializer):
     )
 
     def validate_username(self, value):
+        """Функция валидации по логину."""
         username = value.lower()
         if username == 'me':
             raise ValidationError(
@@ -55,6 +58,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
+    """Сериализатор для получения токена."""
     username = serializers.RegexField(
         required=True,
         regex=r'^[\w.@+-]+\Z',

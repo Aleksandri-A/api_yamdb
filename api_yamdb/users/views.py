@@ -12,10 +12,9 @@ from users.models import Confirm, User
 from users.permissions import IsAdminOnly
 from users.serializers import SignupSerializer, TokenSerializer, UserSerializer
 
-# from rest_framework import permissions
-
 
 class UserViewSet(viewsets.ModelViewSet):
+    """Вью функция для юзеров"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdminOnly,)
@@ -30,6 +29,7 @@ class UserViewSet(viewsets.ModelViewSet):
         url_path='me',
         permission_classes=[permissions.IsAuthenticated, ])
     def me(self, request):
+        """Фунция для получения и изменения данных своей учетной записи."""
         user = get_object_or_404(User, username=self.request.user.username)
         if request.method == 'PATCH':
             serializer = UserSerializer(
@@ -49,6 +49,7 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([AllowAny, ])
 def signup(request):
+    """Функция регистрации нового пользователя."""
     serializer = SignupSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     email = serializer.validated_data.get('email')
@@ -66,8 +67,6 @@ def signup(request):
     Confirm.objects.create(
         username=user, confirmation_code=confirmation_code
     )
-    print(">>>>>>>>>>>>>>>", confirmation_code)
-
     send_mail(
         subject='...',
         message=confirmation_code,
@@ -81,6 +80,7 @@ def signup(request):
 @api_view(['POST'])
 @permission_classes([AllowAny, ])
 def get_tokens_for_user(request):
+    """Функция получения токена."""
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data.get('username')
