@@ -2,8 +2,7 @@ from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as rf
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
-from rest_framework.pagination import (LimitOffsetPagination,
-                                       PageNumberPagination)
+from rest_framework.pagination import (LimitOffsetPagination,)
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 
 from reviews.models import Category, Genre, Review, Title
@@ -36,7 +35,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (rf.DjangoFilterBackend,)
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
@@ -56,7 +55,7 @@ class GenreViewSet(viewsets.ModelViewSet):
     serializer_class = GenreSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
     lookup_field = 'slug'
 
 
@@ -71,7 +70,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
     lookup_field = 'slug'
 
 

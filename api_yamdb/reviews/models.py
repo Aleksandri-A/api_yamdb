@@ -14,6 +14,7 @@ class Category(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        db_index=True
     )
 
     def __str__(self):
@@ -28,6 +29,7 @@ class Genre(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        db_index=True
     )
 
     def __str__(self):
@@ -39,6 +41,7 @@ class Title(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Название',
+        db_index=True
     )
     year = models.IntegerField(
         verbose_name='Год выпуска',
