@@ -1,9 +1,9 @@
 import csv
 
-from django.core.management.base import BaseCommand, CommandError
-from users.models import User
-from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
+from django.core.management.base import BaseCommand
 
+from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
+from users.models import User
 
 DICT = {
     Category: 'category.csv',
@@ -15,8 +15,10 @@ DICT = {
     Comment: 'comments.csv',
 }
 
+
 class Command(BaseCommand):
     help = 'Импортирует данные из csv в базу данных'
+
     def handle(self, *args, **options):
         for model, base in DICT.items():
             with open(
@@ -27,7 +29,7 @@ class Command(BaseCommand):
 
                 objs_to_create = []
                 for data in reader:
-                    if model.objects.filter(id=data['id']).exists():                        
+                    if model.objects.filter(id=data['id']).exists():
                         raise Exception(
                             'БД не пустая, удалите БД и сделайте миграции.'
                         )
