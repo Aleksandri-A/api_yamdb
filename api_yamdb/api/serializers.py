@@ -1,7 +1,7 @@
 import datetime as dt
 import re
 
-from django.db.models import Avg
+from django.db import models
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -51,9 +51,9 @@ class TitleSerializer(serializers.ModelSerializer):
         if obj.reviews.count() == 0:
             return None
         rev = Review.objects.filter(title=obj).aggregate(
-            rating=Avg('score')
+            rating=models.Avg('score')
         )
-        return rev['rating']
+        return round(rev['rating'], 1)
 
 
 class TitleUnsaveSerializer(serializers.ModelSerializer):
