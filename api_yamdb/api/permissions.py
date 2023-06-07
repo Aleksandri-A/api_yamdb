@@ -2,6 +2,9 @@ from rest_framework import permissions
 from rest_framework.permissions import BasePermission
 
 
+ADMIN = 'admin'
+
+
 class IsAuthorAdminModeratorOrReadOnlyPermission(BasePermission):
     message = (
         'Проверка пользователя является ли он админом, автором или модератором'
@@ -20,8 +23,11 @@ class IsAuthorAdminModeratorOrReadOnlyPermission(BasePermission):
 
 
 class IsAdminOnly(BasePermission):
+    '''Права доступа для эндпоинтов жанров категорий и тайтлов'''
+    
     def has_permission(self, request, view):
-        return bool(
-            request.user.is_authenticated and request.user.role == 'admin'
-            or request.user.is_superuser
-        )
+        return (request.method in permissions.SAFE_METHODS
+                or (request.user.is_authenticated and request.user.role == ADMIN
+                    or request.user.is_superuser))
+
+

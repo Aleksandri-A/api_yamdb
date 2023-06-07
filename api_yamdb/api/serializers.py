@@ -9,34 +9,37 @@ from reviews.models import Category, Comment, Genre, Review, Title
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор genre."""
+
     class Meta:
         fields = ('name', 'slug')
         model = Genre
 
-    def validate_slug(self, value):
-        """Валидация имени слага."""
-        regex = r'^[-a-zA-Z0-9_]+$'
-        if not re.match(regex, value):
-            raise serializers.ValidationError('Неверное имя slug')
-        return value
+    # def validate_slug(self, value):
+    #     """Валидация имени слага."""
+    #     regex = r'^[-a-zA-Z0-9_]+$'
+    #     if not re.match(regex, value):
+    #         raise serializers.ValidationError('Неверное имя slug')
+    #     return value
 
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор category."""
+
     class Meta:
         fields = ('name', 'slug')
         model = Category
 
-    def validate_slug(self, value):
-        """Валидация имени слага."""
-        regex = r'^[-a-zA-Z0-9_]+$'
-        if not re.match(regex, value):
-            raise serializers.ValidationError('Неверное имя slug')
-        return value
+    # def validate_slug(self, value):
+    #     """Валидация имени слага."""
+    #     regex = r'^[-a-zA-Z0-9_]+$'
+    #     if not re.match(regex, value):
+    #         raise serializers.ValidationError('Неверное имя slug')
+    #     return value
 
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор title для запросов 'GET'."""
+
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
     description = serializers.CharField(required=False)
@@ -62,10 +65,12 @@ class TitleUnsaveSerializer(serializers.ModelSerializer):
         many=True,
         slug_field='slug',
         queryset=Genre.objects.all()
+        # required = True
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all()
+        # required = True
     )
     description = serializers.CharField(required=False)
 

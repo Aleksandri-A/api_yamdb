@@ -18,7 +18,7 @@ class TitleFilter(rf.FilterSet):
     genre = rf.CharFilter(field_name='genre__slug', lookup_expr='exact')
     category = rf.CharFilter(field_name='category__slug', lookup_expr='exact')
     year = rf.NumberFilter(field_name='year', lookup_expr='exact')
-    name = rf.CharFilter(field_name='name', lookup_expr='exact')
+    name = rf.CharFilter(field_name='name', lookup_expr='icontains')
 
     class Meta:
         model = Title
@@ -27,13 +27,14 @@ class TitleFilter(rf.FilterSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Вью функция для произведений"""
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAdminOnly()]
+    # def get_permissions(self):
+    #     if self.request.method == 'GET':
+    #         return [AllowAny()]
+    #     return [IsAdminOnly()]
 
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = (IsAdminOnly,)
     filter_backends = (rf.DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
     filterset_class = TitleFilter
@@ -46,13 +47,14 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class GenreViewSet(viewsets.ModelViewSet):
     """Вью функция для жанров"""
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAdminOnly()]
+    # def get_permissions(self):
+    #     if self.request.method == 'GET':
+    #         return [AllowAny()]
+    #     return [IsAdminOnly()]
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
     pagination_class = LimitOffsetPagination
@@ -61,13 +63,14 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """Вью функция для категорий"""
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAdminOnly()]
+    # def get_permissions(self):
+    #     if self.request.method == 'GET':
+    #         return [AllowAny()]
+    #     return [IsAdminOnly()]
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
     pagination_class = LimitOffsetPagination
