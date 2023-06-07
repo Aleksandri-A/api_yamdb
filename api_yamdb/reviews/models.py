@@ -99,7 +99,6 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='Название',
         db_index=True,
-        null=False
     )
     text = models.TextField('Содержание отзыва')
     author = models.ForeignKey(

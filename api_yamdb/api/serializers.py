@@ -1,7 +1,6 @@
 import datetime as dt
 import re
 
-from django.db import models
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
@@ -74,6 +73,7 @@ class TokenSerializer(serializers.ModelSerializer):
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор genre."""
+
     class Meta:
         fields = ('name', 'slug')
         model = Genre
@@ -88,6 +88,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор category."""
+
     class Meta:
         fields = ('name', 'slug')
         model = Category
@@ -105,20 +106,12 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
     description = serializers.CharField(required=False)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category',
                   'rating')
         model = Title
-
-    def get_rating(self, obj):
-        if obj.reviews.count() == 0:
-            return None
-        rev = Review.objects.filter(title=obj).aggregate(
-            rating=models.Avg('score')
-        )
-        return round(rev['rating'], 1)
 
 
 class TitleUnsaveSerializer(serializers.ModelSerializer):
@@ -154,7 +147,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Review
-        read_only_fields = ('title', 'author')
+        read_only_fields = ('title',)
 
     def validate(self, data):
         if Review.objects.filter(
@@ -175,4 +168,4 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Comment
-        read_only_fields = ('review', 'author')
+        read_only_fields = ('review',)
