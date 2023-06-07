@@ -4,6 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
+from django.db.models import Avg
 from rest_framework.pagination import (LimitOffsetPagination,)
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework import filters, permissions, status, viewsets
@@ -128,7 +129,8 @@ class TitleViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         return [IsAdminOnly()]
 
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).all()
     serializer_class = TitleSerializer
     filter_backends = (rf.DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
