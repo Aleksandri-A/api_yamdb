@@ -3,8 +3,6 @@ from rest_framework.permissions import BasePermission
 
 
 class IsAuthorAdminModeratorOrReadOnlyPermission(BasePermission):
-    "Проверка пользователя является ли он админом, автором или модератором"
-    "или автором объекта, иначе только режим чтения"
 
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS
