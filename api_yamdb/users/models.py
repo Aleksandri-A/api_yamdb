@@ -2,10 +2,14 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+CUSTOMUSER = 'user'
+MODERATOR = 'moderator'
+ADMIN = 'admin'
+
 ROLE = (
-    ('user', 'user'),
-    ('moderator', 'moderator'),
-    ('admin', 'admin'),
+    (CUSTOMUSER, 'user'),
+    (MODERATOR, 'moderator'),
+    (ADMIN, 'admin'),
 )
 
 
