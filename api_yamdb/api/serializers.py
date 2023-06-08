@@ -14,13 +14,6 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
         model = Genre
 
-    # def validate_slug(self, value):
-    #     """Валидация имени слага."""
-    #     regex = r'^[-a-zA-Z0-9_]+$'
-    #     if not re.match(regex, value):
-    #         raise serializers.ValidationError('Неверное имя slug')
-    #     return value
-
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор category."""
@@ -29,13 +22,6 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
         model = Category
 
-    # def validate_slug(self, value):
-    #     """Валидация имени слага."""
-    #     regex = r'^[-a-zA-Z0-9_]+$'
-    #     if not re.match(regex, value):
-    #         raise serializers.ValidationError('Неверное имя slug')
-    #     return value
-
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор title для запросов 'GET'."""
@@ -43,46 +29,118 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
     description = serializers.CharField(required=False)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(
+        read_only=True 
+    )
 
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category',
                   'rating')
         model = Title
 
-    def get_rating(self, obj):
-        if obj.reviews.count() == 0:
-            return None
-        rev = Review.objects.filter(title=obj).aggregate(
-            rating=models.Avg('score')
-        )
-        return round(rev['rating'], 1)
-
 
 class TitleUnsaveSerializer(serializers.ModelSerializer):
-    """Сериализатор title для запросов 'POST', 'PATCH', 'DELETE'."""
+    """Сериализатор title для запросов 'POST', 'DELETE'."""
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',
         queryset=Genre.objects.all()
-        # required = True
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all()
-        # required = True
     )
+    # genre = serializers.SerializerMethodField()
+    # category = serializers.SerializerMethodField()
     description = serializers.CharField(required=False)
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category',
+                  'rating')
 
     def validate_year(self, value):
         current_year = dt.date.today().year
         if value > current_year:
             raise serializers.ValidationError('Проверьте год выпуска!')
         return value
+
+    def validate(self, attrs):
+        if 'category' not in attrs or attrs['category'] is None:
+            raise serializers.ValidationError('Укажите категорию')
+        if 'genre' not in attrs or not attrs['genre']:
+            raise serializers.ValidationError('Укажите жанр')
+        return attrs
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        genre_data = data.pop('genre')        
+        genres = [{
+            "name": Genre.objects.get(slug=genre).name,
+            "slug": genre
+        } for genre in genre_data]
+        data['genre'] = genres
+        category_data = data.pop('category')
+        _category = {
+            "name": Category.objects.get(slug=category_data).name,
+            "slug": Category.objects.get(slug=category_data).slug    
+        }
+        data['category'] = _category
+        data['rating'] = 0
+        return data
+
+
+class TitlePatchSerializer(serializers.ModelSerializer):
+    """Сериализатор title для запросов 'PATCH'."""
+    genre = serializers.SlugRelatedField(
+        many=True,
+        slug_field='slug',
+        queryset=Genre.objects.all()
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    # genre = serializers.SerializerMethodField()
+    # category = serializers.SerializerMethodField()
+    description = serializers.CharField(required=False)
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Title
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category',
+                  'rating')
+
+    def validate_year(self, value):
+        current_year = dt.date.today().year
+        if value > current_year:
+            raise serializers.ValidationError('Проверьте год выпуска!')
+        return value
+
+    # def validate(self, attrs):
+    #     if 'category' not in attrs or attrs['category'] is None:
+    #         raise serializers.ValidationError('Укажите категорию')
+    #     if 'genre' not in attrs or not attrs['genre']:
+    #         raise serializers.ValidationError('Укажите жанр')
+    #     return attrs
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        genre_data = data.pop('genre')        
+        genres = [{
+            "name": Genre.objects.get(slug=genre).name,
+            "slug": genre
+        } for genre in genre_data]
+        data['genre'] = genres
+        category_data = data.pop('category')
+        _category = {
+            "name": Category.objects.get(slug=category_data).name,
+            "slug": Category.objects.get(slug=category_data).slug    
+        }
+        data['category'] = _category
+        # data['rating'] = 0
+        return data
 
 
 class ReviewSerializer(serializers.ModelSerializer):

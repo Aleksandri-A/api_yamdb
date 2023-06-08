@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as rf
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Avg
 from rest_framework import filters, viewsets
 from rest_framework.pagination import (LimitOffsetPagination,)
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
@@ -11,7 +12,7 @@ from .permissions import (IsAdminOnly,
                           IsAuthorAdminModeratorOrReadOnlyPermission)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, TitleSerializer,
-                          TitleUnsaveSerializer)
+                          TitleUnsaveSerializer, TitlePatchSerializer)
 
 
 class TitleFilter(rf.FilterSet):
@@ -27,30 +28,23 @@ class TitleFilter(rf.FilterSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Вью функция для произведений"""
-    # def get_permissions(self):
-    #     if self.request.method == 'GET':
-    #         return [AllowAny()]
-    #     return [IsAdminOnly()]
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleSerializer
+        elif self.request.method == 'PATCH':
+            return TitlePatchSerializer
+        return TitleUnsaveSerializer
 
-    queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+    queryset = Title.objects.annotate(rating=Avg('reviews__score')).all()
     permission_classes = (IsAdminOnly,)
     filter_backends = (rf.DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
     filterset_class = TitleFilter
 
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return TitleSerializer
-        return TitleUnsaveSerializer
-
 
 class GenreViewSet(viewsets.ModelViewSet):
     """Вью функция для жанров"""
-    # def get_permissions(self):
-    #     if self.request.method == 'GET':
-    #         return [AllowAny()]
-    #     return [IsAdminOnly()]
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -63,10 +57,6 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """Вью функция для категорий"""
-    # def get_permissions(self):
-    #     if self.request.method == 'GET':
-    #         return [AllowAny()]
-    #     return [IsAdminOnly()]
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
