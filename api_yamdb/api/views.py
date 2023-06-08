@@ -1,31 +1,32 @@
-from django.shortcuts import get_object_or_404
-from django_filters import rest_framework as rf
-from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Avg
-from rest_framework.pagination import (LimitOffsetPagination,)
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from django.shortcuts import get_object_or_404
+from django_filters import rest_framework as rf
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.models import Confirm, User, CUSTOMUSER
-
 from reviews.models import Category, Genre, Review, Title
+from users.models import CUSTOMUSER, Confirm, User
 
-from .permissions import (IsAdminOnly,
+from .permissions import (IsAdminOnly, IsAdminOnlyForTitles,
                           IsAuthorAdminModeratorOrReadOnlyPermission)
-from .serializers import (SignupSerializer, TokenSerializer, UserSerializer,
-                          CategorySerializer, CommentSerializer,
-                          GenreSerializer, ReviewSerializer, TitleSerializer,
-                          TitleUnsaveSerializer)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, SignupSerializer,
+                          TitlePatchSerializer, TitleSerializer,
+                          TitleUnsaveSerializer, TokenSerializer,
+                          UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
     """Вью функция для юзеров"""
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdminOnly,)
@@ -112,10 +113,12 @@ def get_tokens_for_user(request):
 
 
 class TitleFilter(rf.FilterSet):
+    """Фильтры для произведений."""
+
     genre = rf.CharFilter(field_name='genre__slug', lookup_expr='exact')
     category = rf.CharFilter(field_name='category__slug', lookup_expr='exact')
     year = rf.NumberFilter(field_name='year', lookup_expr='exact')
-    name = rf.CharFilter(field_name='name', lookup_expr='exact')
+    name = rf.CharFilter(field_name='name', lookup_expr='icontains')
 
     class Meta:
         model = Title
@@ -123,34 +126,29 @@ class TitleFilter(rf.FilterSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """Вью функция для произведений"""
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAdminOnly()]
-
-    queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')).all()
-    serializer_class = TitleSerializer
-    filter_backends = (rf.DjangoFilterBackend,)
-    pagination_class = LimitOffsetPagination
-    filterset_class = TitleFilter
+    """Вьюсет для произведений."""
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return TitleSerializer
+        if self.request.method == 'PATCH':
+            return TitlePatchSerializer
         return TitleUnsaveSerializer
+
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).all()
+    permission_classes = (IsAdminOnlyForTitles,)
+    filter_backends = (DjangoFilterBackend,)
+    pagination_class = LimitOffsetPagination
+    filterset_class = TitleFilter
 
 
 class GenreViewSet(viewsets.ModelViewSet):
-    """Вью функция для жанров"""
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAdminOnly()]
+    """Вьюсет для жанров."""
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOnlyForTitles,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
     pagination_class = LimitOffsetPagination
@@ -158,14 +156,11 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    """Вью функция для категорий"""
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAdminOnly()]
+    """Вьюсет для категорий."""
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOnlyForTitles,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
     pagination_class = LimitOffsetPagination
@@ -174,6 +169,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет отзывов."""
+
     serializer_class = ReviewSerializer
     permission_classes = [
         IsAuthorAdminModeratorOrReadOnlyPermission,
@@ -196,6 +192,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет комментариев."""
+
     serializer_class = CommentSerializer
     permission_classes = [
         IsAuthorAdminModeratorOrReadOnlyPermission,

@@ -1,11 +1,9 @@
 import datetime as dt
-import re
 
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
-
 from users.models import Confirm, User
 
 
@@ -26,6 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SignupSerializer(serializers.ModelSerializer):
     """Сериализатор для модели регистрации."""
+
     username = serializers.RegexField(
         required=True,
         regex=r'^[\w.@+-]+\Z',
@@ -39,6 +38,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         """Функция валидации по логину."""
+
         username = value.lower()
         if username == 'me':
             raise ValidationError(
@@ -56,6 +56,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
 class TokenSerializer(serializers.ModelSerializer):
     """Сериализатор для получения токена."""
+
     username = serializers.RegexField(
         required=True,
         regex=r'^[\w.@+-]+\Z',
@@ -78,13 +79,6 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
         model = Genre
 
-    def validate_slug(self, value):
-        """Валидация имени слага."""
-        regex = r'^[-a-zA-Z0-9_]+$'
-        if not re.match(regex, value):
-            raise serializers.ValidationError('Неверное имя slug')
-        return value
-
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор category."""
@@ -93,29 +87,24 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
         model = Category
 
-    def validate_slug(self, value):
-        """Валидация имени слага."""
-        regex = r'^[-a-zA-Z0-9_]+$'
-        if not re.match(regex, value):
-            raise serializers.ValidationError('Неверное имя slug')
-        return value
-
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор title для запросов 'GET'."""
+
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
     description = serializers.CharField(required=False)
     rating = serializers.IntegerField(read_only=True)
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category',
-                  'rating')
+        fields = ('id', 'name', 'year', 'rating', 'description', 'genre',
+                  'category')
         model = Title
 
 
 class TitleUnsaveSerializer(serializers.ModelSerializer):
-    """Сериализатор title для запросов 'POST', 'PATCH', 'DELETE'."""
+    """Сериализатор title для запросов 'POST', 'DELETE'."""
+
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',
@@ -126,10 +115,12 @@ class TitleUnsaveSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all()
     )
     description = serializers.CharField(required=False)
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category',
+                  'rating')
 
     def validate_year(self, value):
         current_year = dt.date.today().year
@@ -137,9 +128,52 @@ class TitleUnsaveSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Проверьте год выпуска!')
         return value
 
+    def validate(self, attrs):
+        if 'category' not in attrs or attrs['category'] is None:
+            raise serializers.ValidationError('Укажите категорию')
+        if 'genre' not in attrs or not attrs['genre']:
+            raise serializers.ValidationError('Укажите жанр')
+        return attrs
+
+    def to_representation(self, instance):
+        serializer = TitleSerializer(instance)
+        return serializer.data
+
+
+class TitlePatchSerializer(serializers.ModelSerializer):
+    """Сериализатор title для запросов 'PATCH'."""
+
+    genre = serializers.SlugRelatedField(
+        many=True,
+        slug_field='slug',
+        queryset=Genre.objects.all()
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    description = serializers.CharField(required=False)
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Title
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category',
+                  'rating')
+
+    def validate_year(self, value):
+        current_year = dt.date.today().year
+        if value > current_year:
+            raise serializers.ValidationError('Проверьте год выпуска!')
+        return value
+
+    def to_representation(self, instance):
+        serializer = TitleSerializer(instance)
+        return serializer.data
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор отзывов."""
+
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )
@@ -161,6 +195,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор комментариев."""
+
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )

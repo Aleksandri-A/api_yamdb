@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-
 CUSTOMUSER = 'user'
 MODERATOR = 'moderator'
 ADMIN = 'admin'
@@ -15,6 +14,7 @@ ROLE = (
 
 class User(AbstractUser):
     """Модель для юзера."""
+
     email = models.EmailField(unique=True, max_length=254,)
     bio = models.TextField(blank=True)
     role = models.CharField(max_length=255, choices=ROLE, default=CUSTOMUSER)
@@ -36,6 +36,7 @@ class User(AbstractUser):
 
 class Confirm(models.Model):
     """Модель для кода подтверждения."""
+
     confirmation_code = models.CharField(max_length=400)
     username = models.ForeignKey(
         User,
