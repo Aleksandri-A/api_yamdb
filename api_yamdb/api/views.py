@@ -1,18 +1,19 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as rf
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Avg
 from rest_framework import filters, viewsets
-from rest_framework.pagination import (LimitOffsetPagination,)
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from reviews.models import Category, Genre, Review, Title
 
 from .permissions import (IsAdminOnly,
                           IsAuthorAdminModeratorOrReadOnlyPermission)
 from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, ReviewSerializer, TitleSerializer,
-                          TitleUnsaveSerializer, TitlePatchSerializer)
+                          GenreSerializer, ReviewSerializer,
+                          TitlePatchSerializer, TitleSerializer,
+                          TitleUnsaveSerializer)
 
 
 class TitleFilter(rf.FilterSet):
@@ -28,11 +29,11 @@ class TitleFilter(rf.FilterSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Вью функция для произведений"""
-    
+
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return TitleSerializer
-        elif self.request.method == 'PATCH':
+        if self.request.method == 'PATCH':
             return TitlePatchSerializer
         return TitleUnsaveSerializer
 
@@ -69,6 +70,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет отзывов."""
+
     serializer_class = ReviewSerializer
     permission_classes = [
         IsAuthorAdminModeratorOrReadOnlyPermission,
@@ -91,6 +93,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет комментариев."""
+
     serializer_class = CommentSerializer
     permission_classes = [
         IsAuthorAdminModeratorOrReadOnlyPermission,

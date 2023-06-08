@@ -66,7 +66,7 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория',
     )
-    
+
     def __str__(self):
         return self.name
 
