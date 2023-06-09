@@ -8,12 +8,14 @@ LETTERS_LIMIT = 15
 
 class Category(models.Model):
     """Модель категорий."""
+
     name = models.CharField(
         max_length=256,
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        db_index=True
     )
 
     def __str__(self):
@@ -22,12 +24,14 @@ class Category(models.Model):
 
 class Genre(models.Model):
     """Модель жанров."""
+
     name = models.CharField(
         max_length=256,
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        db_index=True
     )
 
     def __str__(self):
@@ -36,9 +40,11 @@ class Genre(models.Model):
 
 class Title(models.Model):
     """Модель произведений."""
+
     name = models.CharField(
         max_length=256,
         verbose_name='Название',
+        db_index=True
     )
     year = models.IntegerField(
         verbose_name='Год выпуска',
@@ -67,6 +73,7 @@ class Title(models.Model):
 
 class TitleGenre(models.Model):
     """Модель для связи многие-ко-многим для произведений и жанров."""
+
     title = models.ForeignKey(
         Title,
         null=True,
@@ -90,13 +97,13 @@ class TitleGenre(models.Model):
 
 class Review(models.Model):
     """Модель отзывов."""
+
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Название',
         db_index=True,
-        null=False
     )
     text = models.TextField('Содержание отзыва')
     author = models.ForeignKey(
@@ -135,6 +142,7 @@ class Review(models.Model):
 
 class Comment(models.Model):
     """Модель комментариев."""
+
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
