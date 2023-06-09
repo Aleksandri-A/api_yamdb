@@ -24,7 +24,7 @@ class Category(models.Model):
 
 class Genre(models.Model):
     """Модель жанров."""
-    
+
     name = models.CharField(
         max_length=256,
     )
