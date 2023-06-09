@@ -24,7 +24,7 @@ class Category(models.Model):
 
 class Genre(models.Model):
     """Модель жанров."""
-
+    
     name = models.CharField(
         max_length=256,
     )
@@ -112,11 +112,9 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='Автор отзыва',
         db_index=True,
-        null=False
     )
     score = models.PositiveSmallIntegerField(
         'Оценка',
-        null=False,
         validators=(
             MinValueValidator(1, 'Минимум 1',),
             MaxValueValidator(10, 'Максимум 10',)
@@ -149,16 +147,14 @@ class Comment(models.Model):
         related_name='comments',
         verbose_name='Название',
         db_index=True,
-        null=False
     )
-    text = models.TextField(null=False)
+    text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Автор комментария',
         db_index=True,
-        null=False
     )
     pub_date = models.DateTimeField(
         'Дата публикации',
